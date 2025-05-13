@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { Button } from '@/components/ui/button';
 import { ContractCard } from '@/components/contract/ContractCard';
 import { useAppContext } from '@/contexts/AppContext';
-import { PlusCircle, ListFilter, Search } from 'lucide-react';
+import { PlusCircle, ListFilter, Search, FileText } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
   Select,
