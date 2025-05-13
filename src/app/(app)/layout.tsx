@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -43,7 +44,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarContent>
         <SidebarFooter className="p-4 group-data-[collapsible=icon]:hidden">
           <p className="text-xs text-sidebar-foreground/70">
-            &copy; {new Date().getFullYear()} LegalMind Inc.
+            &copy; {new Date().getFullYear()} Demo / Confidential
           </p>
         </SidebarFooter>
       </Sidebar>
@@ -56,3 +57,4 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
+
