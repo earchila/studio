@@ -14,80 +14,106 @@ import { useToast } from '@/hooks/use-toast';
 import { useAppContext } from '@/contexts/AppContext';
 import type { ContractDocument } from '@/types';
 
+import { ocrPdfDocument } from '@/ai/flows/ocr-pdf-document'; // New flow
 import { improveOcrAccuracy } from '@/ai/flows/improve-ocr-accuracy';
 import { extractContractData } from '@/ai/flows/extract-contract-data';
 import { determineDataExtractionQuality } from '@/ai/flows/determine-data-extraction-quality';
 
-import { Loader2 } from 'lucide-react';
+import { Loader2, FileUp } from 'lucide-react';
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 const contractFormSchema = z.object({
   name: z.string().min(3, { message: "Contract name must be at least 3 characters." }),
-  originalText: z.string().min(50, { message: "Contract text must be at least 50 characters." }),
-  layoutDescription: z.string().min(10, { message: "Layout description must be at least 10 characters." }).optional(),
+  documentFile: z
+    .instanceof(File, { message: "A PDF document is required." })
+    .refine((file) => file?.size > 0, "A PDF document is required.")
+    .refine((file) => file?.type === "application/pdf", "Only PDF files are accepted.")
+    .refine((file) => file?.size <= MAX_FILE_SIZE, `File size must be ${MAX_FILE_SIZE / (1024*1024)}MB or less.`),
+  layoutDescription: z.string().optional(),
 });
 
 type ContractFormValues = z.infer<typeof contractFormSchema>;
+
+const readFileAsDataURL = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+    reader.readAsDataURL(file);
+  });
+};
 
 export function ContractForm() {
   const router = useRouter();
   const { toast } = useToast();
   const { addContract, setIsLoading, isLoading } = useAppContext();
+  const [fileName, setFileName] = useState<string | null>(null);
 
   const form = useForm<ContractFormValues>({
     resolver: zodResolver(contractFormSchema),
     defaultValues: {
       name: '',
-      originalText: '',
+      documentFile: undefined,
       layoutDescription: '',
     },
   });
 
   async function onSubmit(data: ContractFormValues) {
     setIsLoading(true);
-    toast({ title: "Processing Contract...", description: "AI analysis in progress. This may take a moment." });
+    toast({ title: "Processing Contract...", description: "Uploading PDF and starting AI analysis. This may take a moment." });
 
     try {
       const contractId = crypto.randomUUID();
       let currentContractData: Partial<ContractDocument> = {
         id: contractId,
         name: data.name,
-        originalText: data.originalText,
         layoutDescription: data.layoutDescription,
         uploadedAt: new Date().toISOString(),
         status: 'processing',
       };
 
-      // Step 1: Improve OCR Accuracy (if layout description provided)
-      if (data.layoutDescription) {
-        const ocrResult = await improveOcrAccuracy({
-          ocrText: data.originalText,
+      // Step 0: Read file as Data URI
+      const pdfDataUri = await readFileAsDataURL(data.documentFile);
+
+      // Step 1: OCR PDF Document
+      toast({ title: "Extracting Text...", description: "AI is extracting text from the PDF." });
+      const ocrPdfResult = await ocrPdfDocument({ pdfDataUri });
+      let textForProcessing = ocrPdfResult.extractedText;
+      currentContractData.originalText = textForProcessing; // Store raw extracted text
+
+      // Step 2: Improve OCR Accuracy (if layout description provided)
+      if (data.layoutDescription && data.layoutDescription.trim() !== '') {
+        toast({ title: "Improving Accuracy...", description: "Enhancing text quality with layout information." });
+        const improvedOcrResult = await improveOcrAccuracy({
+          ocrText: textForProcessing,
           documentLayout: data.layoutDescription,
         });
-        currentContractData.ocrImproved = ocrResult;
-        toast({ title: "OCR Improved", description: "Document layout assessed and text enhanced." });
+        currentContractData.ocrImproved = improvedOcrResult;
+        textForProcessing = improvedOcrResult.improvedOcrText; // Use improved text
+        currentContractData.originalText = textForProcessing; // Update with improved text
       }
       
-      const textToExtract = currentContractData.ocrImproved?.improvedOcrText || data.originalText;
-
-      // Step 2: Extract Contract Data
-      const extractedData = await extractContractData({ documentText: textToExtract });
+      // Step 3: Extract Contract Data
+      toast({ title: "Extracting Data...", description: "AI is identifying key information from the contract." });
+      const extractedData = await extractContractData({ documentText: textForProcessing });
       currentContractData.extractedData = extractedData;
-      toast({ title: "Data Extracted", description: "Key information identified from the contract." });
 
-      // Step 3: Determine Data Extraction Quality
+      // Step 4: Determine Data Extraction Quality
+      toast({ title: "Assessing Quality...", description: "AI is evaluating the extraction quality." });
       const qualityAssessment = await determineDataExtractionQuality({
         extractedData: JSON.stringify(extractedData),
-        contractText: textToExtract,
+        contractText: textForProcessing, // Use the same text that was used for extraction
       });
       currentContractData.qualityAssessment = qualityAssessment;
-      toast({ title: "Quality Assessed", description: `Extraction quality: ${qualityAssessment.confidenceLevel}.` });
+      
 
       currentContractData.status = 'analyzed';
       addContract(currentContractData as ContractDocument);
 
       toast({
         title: "Contract Processed Successfully!",
-        description: `${data.name} has been analyzed and saved.`,
+        description: `${data.name} has been analyzed and saved. Quality: ${qualityAssessment.confidenceLevel}.`,
         variant: "default",
       });
       router.push(`/contracts/${contractId}`);
@@ -99,8 +125,7 @@ export function ContractForm() {
         description: error instanceof Error ? error.message : "An unknown error occurred.",
         variant: "destructive",
       });
-      // Update contract status to error if it was partially processed
-      // This part needs careful handling of contract state if an error occurs mid-process
+      // Optionally update contract status to 'error' if it was partially processed and added.
     } finally {
       setIsLoading(false);
     }
@@ -111,7 +136,7 @@ export function ContractForm() {
       <CardHeader>
         <CardTitle>Add New Contract</CardTitle>
         <CardDescription>
-          Enter the contract details below. AI will analyze the text to extract key information.
+          Upload a PDF document. AI will extract text and analyze it for key information.
         </CardDescription>
       </CardHeader>
       <Form {...form}>
@@ -132,20 +157,40 @@ export function ContractForm() {
             />
             <FormField
               control={form.control}
-              name="originalText"
-              render={({ field }) => (
+              name="documentFile"
+              render={({ field: { onChange, value, ...restField } }) => (
                 <FormItem>
-                  <FormLabel>Contract Text</FormLabel>
+                  <FormLabel>Contract Document (PDF)</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Paste the full contract text here..."
-                      className="min-h-[200px] resize-y"
-                      {...field}
-                    />
+                    <div className="flex items-center space-x-2">
+                       <label htmlFor="document-upload" className="flex-grow">
+                        <Input
+                          id="document-upload"
+                          type="file"
+                          accept=".pdf"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              onChange(file);
+                              setFileName(file.name);
+                            } else {
+                              onChange(undefined);
+                              setFileName(null);
+                            }
+                          }}
+                          className="hidden" 
+                          {...restField}
+                        />
+                         <Button type="button" variant="outline" asChild>
+                           <span className="w-full cursor-pointer">
+                             <FileUp className="mr-2 h-4 w-4" />
+                             {fileName || "Choose PDF File..."}
+                           </span>
+                         </Button>
+                       </label>
+                     </div>
                   </FormControl>
-                  <FormDescription>
-                    The AI will process this text. Ensure it's as complete as possible.
-                  </FormDescription>
+                  {fileName && <FormDescription>Selected file: {fileName}</FormDescription>}
                   <FormMessage />
                 </FormItem>
               )}
@@ -158,13 +203,13 @@ export function ContractForm() {
                   <FormLabel>Document Layout Description (Optional)</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="e.g., Two-column layout, headers and footers present, signatures at the end."
+                      placeholder="e.g., Two-column layout, headers/footers present, tables for financial details."
                       className="resize-y"
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
-                    Describing the layout helps improve OCR accuracy.
+                    Describing the layout can help improve text accuracy if standard OCR struggles.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -176,7 +221,7 @@ export function ContractForm() {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
+                  Processing Contract...
                 </>
               ) : (
                 "Analyze and Save Contract"
