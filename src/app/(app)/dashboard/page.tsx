@@ -1,3 +1,4 @@
+
 'use client';
 
 import { PageHeader } from '@/components/common/PageHeader';
@@ -56,7 +57,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+      <div className="mt-8 grid gap-6 lg:grid-cols-1"> {/* Changed lg:grid-cols-2 to lg:grid-cols-1 */}
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>Recent Contracts</CardTitle>
@@ -82,25 +83,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle>Key Features</CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[
-              { title: "AI-Powered OCR", description: "Improve accuracy with layout-aware text extraction.", image: "/images/feature-ocr.jpg", hint: "document scanning" },
-              { title: "Smart Data Extraction", description: "Automatically pull key dates, amounts, and clauses.", image: "/images/feature-extraction.jpg", hint: "data graph" },
-              { title: "Breach Detection", description: "Identify potential non-compliance issues proactively.", image: "/images/feature-breach.jpg", hint: "warning sign" },
-              { title: "Automated Alerts", description: "Stay informed on deadlines and critical events.", image: "/images/feature-alerts.jpg", hint: "notification bell" },
-            ].map(feature => (
-              <div key={feature.title} className="p-4 border rounded-lg bg-background hover:shadow-md transition-shadow">
-                <Image src={`https://picsum.photos/seed/${feature.title.replace(/\s+/g, '')}/300/200`} alt={feature.title} width={300} height={200} className="rounded-md mb-3 aspect-video object-cover" data-ai-hint={feature.hint}/>
-                <h3 className="font-semibold text-md text-primary mb-1">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground">{feature.description}</p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+        {/* Removed Key Features Card */}
       </div>
     </>
   );
