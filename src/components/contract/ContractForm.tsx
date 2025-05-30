@@ -120,7 +120,7 @@ export function ContractForm() {
         description: `${data.name} has been analyzed and saved. Quality: ${qualityAssessment.confidenceLevel}.`,
         variant: "default",
       });
-      router.push(`/contracts/${contractId}`);
+      router.push('/dashboard');
 
     } catch (error) {
       console.error("Error processing contract:", error);
