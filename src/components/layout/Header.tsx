@@ -22,7 +22,7 @@ export function Header() {
         <Link href="/dashboard" className="text-primary">
           <div className="flex flex-col leading-tight">
             <span className="text-lg font-bold">LegalMind</span>
-            <span className="text-base font-bold">Contract Analyzer</span>
+            <span className="text-base font-bold whitespace-nowrap">Contract Analyzer</span>
           </div>
         </Link>
       </div>
