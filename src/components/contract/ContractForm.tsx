@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -14,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAppContext } from '@/contexts/AppContext';
 import type { ContractDocument } from '@/types';
 
-import { ocrPdfDocument } from '@/ai/flows/ocr-pdf-document'; // New flow
+import { ocrPdfDocument } from '@/ai/flows/ocr-pdf-document';
 import { improveOcrAccuracy } from '@/ai/flows/improve-ocr-accuracy';
 import { extractContractData } from '@/ai/flows/extract-contract-data';
 import { determineDataExtractionQuality } from '@/ai/flows/determine-data-extraction-quality';
@@ -94,25 +95,24 @@ export function ContractForm() {
         });
         currentContractData.ocrImproved = improvedOcrResult;
         textForProcessing = improvedOcrResult.improvedOcrText; // Use improved text
-        currentContractData.originalText = textForProcessing; // Update with improved text
       }
       
       // Step 3: Extract Contract Data
-      // Future: Consider how to use data.userInstructions here.
-      // For example, append to prompt or use as a separate input for extractContractData flow.
       toast({ title: "Extracting Data...", description: "AI is identifying key information from the contract." });
-      const extractedData = await extractContractData({ documentText: textForProcessing });
-      currentContractData.extractedData = extractedData;
+      const extractedDataResult = await extractContractData({ 
+        documentText: textForProcessing,
+        userInstructions: data.userInstructions // Pass the user instructions
+      });
+      currentContractData.extractedData = extractedDataResult;
 
       // Step 4: Determine Data Extraction Quality
       toast({ title: "Assessing Quality...", description: "AI is evaluating the extraction quality." });
       const qualityAssessment = await determineDataExtractionQuality({
-        extractedData: JSON.stringify(extractedData),
+        extractedData: JSON.stringify(extractedDataResult),
         contractText: textForProcessing, // Use the same text that was used for extraction
       });
       currentContractData.qualityAssessment = qualityAssessment;
       
-
       currentContractData.status = 'analyzed';
       addContract(currentContractData as ContractDocument);
 
@@ -130,7 +130,6 @@ export function ContractForm() {
         description: error instanceof Error ? error.message : "An unknown error occurred.",
         variant: "destructive",
       });
-      // Optionally update contract status to 'error' if it was partially processed and added.
     } finally {
       setIsLoading(false);
     }

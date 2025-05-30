@@ -12,6 +12,7 @@ import {z} from 'genkit';
 
 const ExtractContractDataInputSchema = z.object({
   documentText: z.string().describe('The text content of the contract document.'),
+  userInstructions: z.string().optional().describe('Optional user-provided instructions or specific questions to guide the data extraction process.'),
 });
 export type ExtractContractDataInput = z.infer<typeof ExtractContractDataInputSchema>;
 
@@ -49,6 +50,11 @@ const prompt = ai.definePrompt({
   prompt: `You are an AI assistant tasked with extracting key data points from contract documents.
 
   Analyze the following contract text and extract the relevant information to provide a concise summary and specific details as requested in the output schema.
+
+  {{#if userInstructions}}
+  Additionally, please consider the following specific instructions or questions while performing the extraction:
+  {{{userInstructions}}}
+  {{/if}}
 
   Contract Text: {{{documentText}}}
   `,
