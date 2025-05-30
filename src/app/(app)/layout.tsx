@@ -44,7 +44,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarContent>
         <SidebarFooter className="p-4 group-data-[collapsible=icon]:hidden">
           <p className="text-xs text-sidebar-foreground/70">
-            &copy; {new Date().getFullYear()} Demo / Confidential
+            &copy; {new Date().getFullYear()} Cymbal Retail / Confidential
           </p>
         </SidebarFooter>
       </Sidebar>
