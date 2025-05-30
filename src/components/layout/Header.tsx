@@ -1,7 +1,7 @@
+
 'use client';
 
 import Link from 'next/link';
-import { AppLogo } from '@/components/layout/AppLogo';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -19,8 +19,8 @@ export function Header() {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-6">
       <div className="hidden md:block">
-        <Link href="/dashboard">
-          <AppLogo className="h-8 w-auto" />
+        <Link href="/dashboard" className="text-lg font-bold text-primary">
+          LegalMind Contract Analyzer
         </Link>
       </div>
       <div className="md:hidden">
