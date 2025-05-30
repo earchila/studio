@@ -37,7 +37,7 @@ export function AppLogo({
         fontFamily="var(--font-geist-sans), Arial, sans-serif"
         fontSize="22"
         fontWeight="bold"
-        fill="#000000"
+        fill="currentColor"
       >
         Cymbal
       </text>
@@ -47,7 +47,7 @@ export function AppLogo({
         fontFamily="var(--font-geist-sans), Arial, sans-serif"
         fontSize="22"
         fontWeight="bold"
-        fill="#000000"
+        fill="currentColor"
       >
         Shops
       </text>
