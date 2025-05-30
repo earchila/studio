@@ -8,7 +8,6 @@ export interface ContractDocument {
   name: string;
   uploadedAt: string; // ISO date string
   originalText?: string;
-  layoutDescription?: string;
   userInstructions?: string; // Added field for user-specific instructions
   ocrImproved?: ImproveOcrAccuracyOutput;
   extractedData?: ExtractContractDataOutput;
@@ -46,4 +45,3 @@ export interface BreachConditionRule {
   value?: string | number | boolean;
   description: string; // Description of what this rule checks for
 }
-

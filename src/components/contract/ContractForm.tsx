@@ -31,8 +31,7 @@ const contractFormSchema = z.object({
     .refine((file) => file?.size > 0, "A PDF document is required.")
     .refine((file) => file?.type === "application/pdf", "Only PDF files are accepted.")
     .refine((file) => file?.size <= MAX_FILE_SIZE, `File size must be ${MAX_FILE_SIZE / (1024*1024)}MB or less.`),
-  layoutDescription: z.string().optional(),
-  userInstructions: z.string().optional(), // Added field for user instructions
+  userInstructions: z.string().optional(), 
 });
 
 type ContractFormValues = z.infer<typeof contractFormSchema>;
@@ -57,8 +56,7 @@ export function ContractForm() {
     defaultValues: {
       name: '',
       documentFile: undefined,
-      layoutDescription: '',
-      userInstructions: '', // Default value for user instructions
+      userInstructions: '', 
     },
   });
 
@@ -71,8 +69,7 @@ export function ContractForm() {
       let currentContractData: Partial<ContractDocument> = {
         id: contractId,
         name: data.name,
-        layoutDescription: data.layoutDescription,
-        userInstructions: data.userInstructions, // Include user instructions
+        userInstructions: data.userInstructions, 
         uploadedAt: new Date().toISOString(),
         status: 'processing',
       };
@@ -84,24 +81,26 @@ export function ContractForm() {
       toast({ title: "Extracting Text...", description: "AI is extracting text from the PDF." });
       const ocrPdfResult = await ocrPdfDocument({ pdfDataUri });
       let textForProcessing = ocrPdfResult.extractedText;
-      currentContractData.originalText = textForProcessing; // Store raw extracted text
+      currentContractData.originalText = textForProcessing; 
 
-      // Step 2: Improve OCR Accuracy (if layout description provided)
-      if (data.layoutDescription && data.layoutDescription.trim() !== '') {
-        toast({ title: "Improving Accuracy...", description: "Enhancing text quality with layout information." });
-        const improvedOcrResult = await improveOcrAccuracy({
-          ocrText: textForProcessing,
-          documentLayout: data.layoutDescription,
-        });
-        currentContractData.ocrImproved = improvedOcrResult;
-        textForProcessing = improvedOcrResult.improvedOcrText; // Use improved text
-      }
+      // Step 2: Improve OCR Accuracy (This step was conditional on layoutDescription, which is now removed)
+      // If improveOcrAccuracy is still desired without layoutDescription, its call and input schema would need adjustment.
+      // For now, it's effectively disabled as data.layoutDescription no longer exists.
+      // Example: if a default or empty layout description should be used:
+      /*
+      const improvedOcrResult = await improveOcrAccuracy({
+        ocrText: textForProcessing,
+        documentLayout: "", // Or some default
+      });
+      currentContractData.ocrImproved = improvedOcrResult;
+      textForProcessing = improvedOcrResult.improvedOcrText;
+      */
       
       // Step 3: Extract Contract Data
       toast({ title: "Extracting Data...", description: "AI is identifying key information from the contract." });
       const extractedDataResult = await extractContractData({ 
         documentText: textForProcessing,
-        userInstructions: data.userInstructions // Pass the user instructions
+        userInstructions: data.userInstructions 
       });
       currentContractData.extractedData = extractedDataResult;
 
@@ -109,7 +108,7 @@ export function ContractForm() {
       toast({ title: "Assessing Quality...", description: "AI is evaluating the extraction quality." });
       const qualityAssessment = await determineDataExtractionQuality({
         extractedData: JSON.stringify(extractedDataResult),
-        contractText: textForProcessing, // Use the same text that was used for extraction
+        contractText: textForProcessing, 
       });
       currentContractData.qualityAssessment = qualityAssessment;
       
@@ -195,26 +194,6 @@ export function ContractForm() {
                      </div>
                   </FormControl>
                   {fileName && <FormDescription>Selected file: {fileName}</FormDescription>}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="layoutDescription"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Document Layout Description (Optional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="e.g., Two-column layout, headers/footers present, tables for financial details."
-                      className="resize-y"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Describing the layout can help improve text accuracy if standard OCR struggles.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
