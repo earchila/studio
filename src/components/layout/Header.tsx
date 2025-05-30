@@ -19,8 +19,11 @@ export function Header() {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-6">
       <div className="hidden md:block">
-        <Link href="/dashboard" className="text-lg font-bold text-primary">
-          LegalMind Contract Analyzer
+        <Link href="/dashboard" className="text-primary">
+          <div className="flex flex-col leading-tight">
+            <span className="text-lg font-bold">LegalMind</span>
+            <span className="text-base font-bold">Contract Analyzer</span>
+          </div>
         </Link>
       </div>
       <div className="md:hidden">
