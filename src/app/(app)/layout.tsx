@@ -31,10 +31,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar variant="sidebar" collapsible="icon" className="border-r border-sidebar-border">
         <SidebarHeader className="p-4">
           <Link href="/dashboard" className="block group-data-[collapsible=icon]:hidden">
-            <AppLogo />
+            <AppLogo width="127" height="38" />
           </Link>
            <Link href="/dashboard" className="hidden group-data-[collapsible=icon]:block">
-            <AppLogo className="w-8 h-8" /> {/* Smaller logo for collapsed state */}
+            <AppLogo iconOnly className="w-8 h-8" /> {/* Smaller logo for collapsed state */}
           </Link>
         </SidebarHeader>
         <SidebarContent asChild>

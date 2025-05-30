@@ -1,31 +1,55 @@
 import type { SVGProps } from 'react';
 
-export function AppLogo(props: SVGProps<SVGSVGElement>) {
+export function AppLogo({
+  iconOnly = false,
+  ...props
+}: SVGProps<SVGSVGElement> & { iconOnly?: boolean }) {
+  if (iconOnly) {
+    return (
+      <svg
+        viewBox="0 0 53 53"
+        aria-label="Cymbal Shops Icon"
+        xmlns="http://www.w3.org/2000/svg"
+        {...props}
+      >
+        <rect x="0" y="0" width="25" height="25" rx="5" fill="#D83A56" />
+        <rect x="0" y="28" width="25" height="25" rx="5" fill="#F47B20" />
+        <rect x="28" y="28" width="25" height="25" rx="5" fill="#7A2850" />
+      </svg>
+    );
+  }
+
   return (
     <svg
+      viewBox="0 0 200 60"
+      aria-label="Cymbal Shops Logo"
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 200 50"
-      width="150"
-      height="38"
-      aria-label="LegalMind Logo"
       {...props}
     >
-      <defs>
-        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 1 }} />
-          <stop offset="100%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 1 }} />
-        </linearGradient>
-      </defs>
-      <rect width="200" height="50" fill="transparent" />
+      {/* Icon part */}
+      <rect x="0" y="5" width="25" height="25" rx="5" fill="#D83A56" />
+      <rect x="0" y="33" width="25" height="25" rx="5" fill="#F47B20" />
+      <rect x="28" y="33" width="25" height="25" rx="5" fill="#7A2850" />
+      {/* Text part */}
       <text
-        x="10"
-        y="35"
+        x="60"
+        y="28"
         fontFamily="var(--font-geist-sans), Arial, sans-serif"
-        fontSize="30"
+        fontSize="22"
         fontWeight="bold"
-        fill="url(#logoGradient)"
+        fill="#000000"
       >
-        LegalMind
+        Cymbal
+      </text>
+      <text
+        x="60"
+        y="52"
+        fontFamily="var(--font-geist-sans), Arial, sans-serif"
+        fontSize="22"
+        fontWeight="bold"
+        fill="#000000"
+      >
+        Shops
       </text>
     </svg>
   );
