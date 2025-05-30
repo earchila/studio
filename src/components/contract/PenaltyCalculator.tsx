@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { DollarSign, PlusCircle, Trash2 } from 'lucide-react';
+import { DollarSign, PlusCircle, Trash2, Loader2 } from 'lucide-react';
 import { useAppContext } from '@/contexts/AppContext';
 import { useToast } from '@/hooks/use-toast';
+import { FormItem } from '@/components/ui/form'; // Added import
 
 interface PenaltyCalculatorProps {
   contract: ContractDocument;
