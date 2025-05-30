@@ -31,6 +31,7 @@ const contractFormSchema = z.object({
     .refine((file) => file?.type === "application/pdf", "Only PDF files are accepted.")
     .refine((file) => file?.size <= MAX_FILE_SIZE, `File size must be ${MAX_FILE_SIZE / (1024*1024)}MB or less.`),
   layoutDescription: z.string().optional(),
+  userInstructions: z.string().optional(), // Added field for user instructions
 });
 
 type ContractFormValues = z.infer<typeof contractFormSchema>;
@@ -56,6 +57,7 @@ export function ContractForm() {
       name: '',
       documentFile: undefined,
       layoutDescription: '',
+      userInstructions: '', // Default value for user instructions
     },
   });
 
@@ -69,6 +71,7 @@ export function ContractForm() {
         id: contractId,
         name: data.name,
         layoutDescription: data.layoutDescription,
+        userInstructions: data.userInstructions, // Include user instructions
         uploadedAt: new Date().toISOString(),
         status: 'processing',
       };
@@ -95,6 +98,8 @@ export function ContractForm() {
       }
       
       // Step 3: Extract Contract Data
+      // Future: Consider how to use data.userInstructions here.
+      // For example, append to prompt or use as a separate input for extractContractData flow.
       toast({ title: "Extracting Data...", description: "AI is identifying key information from the contract." });
       const extractedData = await extractContractData({ documentText: textForProcessing });
       currentContractData.extractedData = extractedData;
@@ -210,6 +215,27 @@ export function ContractForm() {
                   </FormControl>
                   <FormDescription>
                     Describing the layout can help improve text accuracy if standard OCR struggles.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="userInstructions"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Specific Instructions / Prompt (Optional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="e.g., 'Focus on extracting all payment deadlines.', 'What are the key obligations of Party A?', 'Summarize the intellectual property clauses.'"
+                      className="resize-y"
+                      rows={3}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Provide any specific instructions or questions for the AI to consider during analysis.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
