@@ -12,6 +12,7 @@ import { detectPotentialBreaches } from '@/ai/flows/detect-potential-breaches';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Label } from '../ui/label';
+import { FormItem } from '@/components/ui/form';
 
 interface BreachDetectorProps {
   contract: ContractDocument;
@@ -160,9 +161,9 @@ export function BreachDetector({ contract }: BreachDetectorProps) {
             {breachResult.potentialBreaches.length > 0 ? (
               <ul className="space-y-2 list-disc list-inside pl-1">
                 {breachResult.potentialBreaches.map((breach, idx) => (
-                  <li key={idx} className="p-2 border rounded-md bg-destructive/10 text-destructive-foreground flex items-start">
+                  <li key={idx} className="p-2 border rounded-md bg-destructive/10 flex items-start">
                     <AlertTriangle className="h-4 w-4 mr-2 mt-0.5 shrink-0 text-destructive" />
-                    <span>{breach}</span>
+                    <span className="text-foreground">{breach}</span>
                   </li>
                 ))}
               </ul>
