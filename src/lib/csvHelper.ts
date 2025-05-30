@@ -15,7 +15,9 @@ export function exportContractToCsv(contract: ContractDocument): void {
   const headers = [
     "ID", "Name", "Uploaded At", "Status",
     "OCR Improved Text", "Layout Assessment",
-    "Extracted Summary", "Effective Date", "Expiration Date", "Parties Involved", "Financial Terms", "Conditions", "Breach Clauses", "Termination Clauses",
+    "Extracted Summary", "Effective Date", "Expiration Date", "Parties Involved", "Financial Terms", 
+    "Deliverables", "Acceptance Criteria", 
+    "Conditions", "Breach Clauses", "Termination Clauses",
     "Quality Score", "Confidence Level", "Is Complete", "Quality Justification",
     "Breach Detection Conditions", "Potential Breaches", "Breach Summary",
     "Penalties", "Alerts"
@@ -33,6 +35,8 @@ export function exportContractToCsv(contract: ContractDocument): void {
     escapeCsvValue(contract.extractedData?.expirationDate),
     escapeCsvValue(contract.extractedData?.partiesInvolved?.join('; ')),
     escapeCsvValue(contract.extractedData?.financialTerms),
+    escapeCsvValue(contract.extractedData?.deliverables?.join('; ')),
+    escapeCsvValue(contract.extractedData?.acceptanceCriteria?.join('; ')),
     escapeCsvValue(contract.extractedData?.conditions?.join('; ')),
     escapeCsvValue(contract.extractedData?.breachClauses?.join('; ')),
     escapeCsvValue(contract.extractedData?.terminationClauses?.join('; ')),

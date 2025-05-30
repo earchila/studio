@@ -6,17 +6,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { AlertTriangle, CheckCircle, FileText, Info, ListChecks, BarChart3 } from 'lucide-react';
+import { AlertTriangle, CheckCircle, FileText, Info, ListChecks, BarChart3, LucideIcon, Package, CheckSquare } from 'lucide-react';
 import { PenaltyCalculator } from './PenaltyCalculator';
 import { BreachDetector } from './BreachDetector';
 import { DataExportButton } from '@/components/common/DataExportButton';
+import { useAppContext as useActualAppContext } from '@/contexts/AppContext'; // Renamed import
+
 
 interface ContractDetailsViewProps {
   contract: ContractDocument;
 }
 
 function DataSection({ title, data, Icon }: { title: string, data: any, Icon?: LucideIcon }) {
-  if (!data) return null;
+  if (!data || (Array.isArray(data) && data.length === 0)) return null;
   const isObject = typeof data === 'object' && data !== null && !Array.isArray(data);
   
   return (
@@ -90,6 +92,8 @@ export function ContractDetailsView({ contract }: ContractDetailsViewProps) {
                   </div>
                   <DataSection title="Parties Involved" data={extractedData.partiesInvolved} Icon={ListChecks} />
                   <DataSection title="Financial Terms" data={extractedData.financialTerms} />
+                  <DataSection title="Deliverables" data={extractedData.deliverables} Icon={Package} />
+                  <DataSection title="Acceptance Criteria" data={extractedData.acceptanceCriteria} Icon={CheckSquare} />
                   <DataSection title="Key Conditions & Obligations" data={extractedData.conditions} />
                   <DataSection title="Breach Clauses" data={extractedData.breachClauses} />
                   <DataSection title="Termination Clauses" data={extractedData.terminationClauses} />
@@ -151,7 +155,7 @@ export function ContractDetailsView({ contract }: ContractDetailsViewProps) {
 }
 
 function PageHeaderForDetails({ title, uploadedAt, contractStatus, contractId }: { title: string, uploadedAt: string, contractStatus: ContractDocument['status'], contractId: string }) {
-  const { getContractById } = useAppContext();
+  const { getContractById } = useActualAppContext(); // Using renamed import
   const contract = getContractById(contractId);
 
   if (!contract) return null;
@@ -184,11 +188,3 @@ function PageHeaderForDetails({ title, uploadedAt, contractStatus, contractId }:
     </div>
   );
 }
-
-// Placeholder for useAppContext if not using global context (e.g., for page-level state)
-const useAppContext = () => {
-  // In a real app, this would come from React Context
-  return {
-    getContractById: (id: string) => ({ id, name: "Mock Contract", uploadedAt: new Date().toISOString(), status: "analyzed" } as ContractDocument),
-  };
-};

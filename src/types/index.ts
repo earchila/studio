@@ -1,16 +1,20 @@
 import type { ImproveOcrAccuracyOutput } from "@/ai/flows/improve-ocr-accuracy";
-import type { ExtractContractDataOutput } from "@/ai/flows/extract-contract-data";
+import type { ExtractContractDataOutput as GenkitExtractContractDataOutput } from "@/ai/flows/extract-contract-data";
 import type { DetermineDataExtractionQualityOutput } from "@/ai/flows/determine-data-extraction-quality";
 import type { DetectPotentialBreachesOutput } from "@/ai/flows/detect-potential-breaches";
+
+// Re-exporting the schema-derived type for external use.
+export type ExtractContractDataOutput = GenkitExtractContractDataOutput;
+
 
 export interface ContractDocument {
   id: string;
   name: string;
   uploadedAt: string; // ISO date string
   originalText?: string;
-  userInstructions?: string; // Added field for user-specific instructions
+  userInstructions?: string;
   ocrImproved?: ImproveOcrAccuracyOutput;
-  extractedData?: ExtractContractDataOutput;
+  extractedData?: ExtractContractDataOutput; // Uses the re-exported type
   qualityAssessment?: DetermineDataExtractionQualityOutput;
   breachDetection?: {
     conditions: string; // JSON string of conditions

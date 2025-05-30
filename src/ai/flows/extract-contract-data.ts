@@ -21,8 +21,8 @@ const ExtractContractDataOutputSchema = z.object({
   contractSummary: z
     .string()
     .describe('A concise summary of the contract including key data points.'),
-  effectiveDate: z.string().optional().describe('The date when the contract becomes effective. Should be in YYYY-MM-DD format if possible.'),
-  expirationDate: z.string().optional().describe('The date when the contract expires. Should be in YYYY-MM-DD format if possible.'),
+  effectiveDate: z.string().optional().describe('The date when the contract becomes effective. Normalize to YYYY-MM-DD format if possible.'),
+  expirationDate: z.string().optional().describe('The date when the contract expires. Normalize to YYYY-MM-DD format if possible.'),
   partiesInvolved: z.array(z.string()).describe('List of parties involved in the contract.'),
   financialTerms: z.string().optional().describe('Summary of financial terms (amounts, payment terms, etc.).'),
   conditions: z
@@ -37,6 +37,14 @@ const ExtractContractDataOutputSchema = z.object({
     .array(z.string())
     .optional()
     .describe('Clauses outlining the conditions for contract termination.'),
+  deliverables: z
+    .array(z.string())
+    .optional()
+    .describe('List any specific deliverables, services, or outcomes that must be provided according to the contract. Each deliverable should be a separate string in the array.'),
+  acceptanceCriteria: z
+    .array(z.string())
+    .optional()
+    .describe('List the criteria or conditions that must be met for deliverables or project milestones to be considered accepted. Each criterion should be a separate string in the array.'),
 });
 export type ExtractContractDataOutput = z.infer<typeof ExtractContractDataOutputSchema>;
 
@@ -53,7 +61,7 @@ const prompt = ai.definePrompt({
   Analyze the following contract text and extract the relevant information to provide a concise summary and specific details as requested in the output schema.
 
   When extracting dates (like effective date or expiration date), please adhere to the following:
-  - Recognize various common date formats (e.g., "Month DD, YYYY", "MM/DD/YYYY", "YYYY-MM-DD", "DD Month YYYY", "MM-DD-YY").
+  - Recognize various common date formats (e.g., "Month D, YYYY""Month DD, YYYY", "MM/DD/YYYY", "YYYY-MM-DD", "DD Month YYYY", "MM-DD-YY").
   - Interpret natural language descriptions of dates. For example, "four months after start date", "the first Monday of June 2025", or "upon signing".
   - If a date is relative to another date (e.g., "X months after [another date field like 'start date']"), and that base date is also being extracted or is clearly identifiable in the text, try to calculate and provide the absolute date in YYYY-MM-DD format.
   - If an absolute date cannot be confidently calculated from a natural language description (e.g., "upon signing" without a clear signing date, or a complex relative date calculation), provide the natural language description as extracted in the date field.
@@ -84,4 +92,3 @@ const extractContractDataFlow = ai.defineFlow(
     return output!;
   }
 );
-
